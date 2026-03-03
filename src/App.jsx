@@ -28,9 +28,7 @@ export default function App() {
       if (!res.ok) throw new Error(`API error: ${res.status}`);
       const json = await res.json();
 
-      // Support both formats:
-      // 1) array: [{parking_id,...}]
-      // 2) object: {meta:..., data:[...]}
+   
       if (Array.isArray(json)) {
         setRows(json);
         setMeta({ source: "array", fetchedAt: new Date().toISOString() });
@@ -67,7 +65,6 @@ export default function App() {
     return copy.slice(0, 10);
   }, [rows]);
 
-  // Pagination calculations
   const totalRows = filtered.length;
   const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
   const safePage = Math.min(page, totalPages);
@@ -78,7 +75,6 @@ export default function App() {
     return filtered.slice(startIdx, endIdx);
   }, [filtered, startIdx, endIdx]);
 
-  // Keep page valid when filter/pageSize changes
   useEffect(() => {
     if (page > totalPages) setPage(1);
   }, [totalPages, page]);
@@ -90,7 +86,7 @@ export default function App() {
     <div className="page">
       <header className="header">
         <div>
-          <h2 className="title">Dynamic Parking Prices</h2>
+          <h2 className="title">Dynamic Shared Parking Prices</h2>
           <div className="sub">
             {meta?.generated_at_utc ? (
               <>Last generated (UTC): <span className="mono">{meta.generated_at_utc}</span></>
