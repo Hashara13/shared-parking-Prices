@@ -12,11 +12,22 @@ import {
 import "./App.css";
 
 const MODELS = [
-  { short: "HFBR", label: "HistGradientBoostingRegressor", value: "hfbr" },
-  { short: "XGBR", label: "Extreme Gradient Boosting", value: "xgbr" },
-  { short: "RFR", label: "Random Forest Regression", value: "rfr" },
+  {
+    value: "hfbr",
+    short: "HFBR",
+    long: "HistGradientBoosting Regressor",
+  },
+  {
+    value: "xgbr",
+    short: "XGBR",
+    long: "Extreme Gradient Boosting Regressor",
+  },
+  {
+    value: "rfr",
+    short: "RFR",
+    long: "Random Forest Regressor",
+  },
 ];
-
 const fmt = (n) => {
   const x = Number(n);
   if (Number.isNaN(x)) return "-";
@@ -197,25 +208,20 @@ export default function App() {
         : best
     );
   }, [comparisonCards]);
-  const revenueChartData = useMemo(() => {
-  return MODELS.map((m) => {
-    const meta = comparison[m.value];
-    return {
-      model: m.label,
-      revenue: Number(meta?.total_rev_dynamic ?? 0),
-      isBest: bestModel?.value === m.value,
-    };
-  });
-}, [comparison, bestModel]);
-const activeModel = MODELS.find(m => m.value === selectedModel);
 
+  const revenueChartData = MODELS.map(m => ({
+  model: m.short,
+  revenue: comparison[m.value]?.total_rev_dynamic || 0
+}));
+
+const activeModel = MODELS.find(m => m.value === selectedModel);
   return (
     <div className="page">
       <header className="header">
         <div>
           <h2 className="title">Dynamic Shared Parking Prices</h2>
           <div className="sub">
-Active model: {activeModel?.label}          </div>
+Active model: {activeModel?.long}         </div>
           <div className="sub">
             {meta?.generated_at_utc ? (
               <>
@@ -236,12 +242,12 @@ Active model: {activeModel?.label}          </div>
         </div>
 
         <div className="actions">
-        <select
+   <select
   className="select"
   value={selectedModel}
   onChange={(e)=>setSelectedModel(e.target.value)}
 >
-  {MODELS.map((m)=>(
+  {MODELS.map(m => (
     <option key={m.value} value={m.value}>
       {m.short}
     </option>
@@ -343,7 +349,7 @@ Active model: {activeModel?.label}          </div>
           <div className="sectionTitle">Model Comparison</div>
           {bestModel && (
             <span className="badge badgeSuccess">
-              Best by dynamic revenue: {bestModel.label}
+              Best by dynamic revenue: {bestModel.short}
             </span>
           )}
         </div>
@@ -351,15 +357,15 @@ Active model: {activeModel?.label}          </div>
         <div className="compareGrid">
           {comparisonCards.map((card) => {
             const meta = card.meta;
-            const isBest = bestModel?.value === card.value;
+            const isBest = bestModel?.short === card.short;
 
             return (
               <div
                 key={card.value}
-                className={`card compareCard ${selectedModel === card.value ? "activeCard" : ""}`}
+                className={`card compareCard ${selectedModel === card.short ? "activeCard" : ""}`}
               >
                 <div className="cardTitle">
-                  <span>{card.label}</span>
+                  <span>{card.short}</span>
                   {isBest && <span className="badge badgeSuccess">Best</span>}
                 </div>
 
@@ -420,7 +426,7 @@ Active model: {activeModel?.label}          </div>
       <section className="tableWrap">
         <div className="tableHeader">
           <div className="tableTitle">
-            Price Table — {selectedModel.toUpperCase()}
+            Price Table - {selectedModel.toUpperCase()}
           </div>
 
           <div className="tableControls">
