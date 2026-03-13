@@ -1,10 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Cell,
+} from "recharts";
 import "./App.css";
 
 const MODELS = [
-  { label: "HFBR", value: "hfbr" },
-  { label: "XGBR", value: "xgbr" },
-  { label: "RFR", value: "rfr" },
+  { short: "HFBR", label: "HistGradientBoostingRegressor", value: "hfbr" },
+  { short: "XGBR", label: "Extreme Gradient Boosting", value: "xgbr" },
+  { short: "RFR", label: "Random Forest Regression", value: "rfr" },
 ];
 
 const fmt = (n) => {
@@ -187,6 +197,17 @@ export default function App() {
         : best
     );
   }, [comparisonCards]);
+  const revenueChartData = useMemo(() => {
+  return MODELS.map((m) => {
+    const meta = comparison[m.value];
+    return {
+      model: m.label,
+      revenue: Number(meta?.total_rev_dynamic ?? 0),
+      isBest: bestModel?.value === m.value,
+    };
+  });
+}, [comparison, bestModel]);
+const activeModel = MODELS.find(m => m.value === selectedModel);
 
   return (
     <div className="page">
@@ -194,8 +215,7 @@ export default function App() {
         <div>
           <h2 className="title">Dynamic Shared Parking Prices</h2>
           <div className="sub">
-            Active model: <span className="mono">{selectedModel.toUpperCase()}</span>
-          </div>
+Active model: {activeModel?.label}          </div>
           <div className="sub">
             {meta?.generated_at_utc ? (
               <>
@@ -216,21 +236,17 @@ export default function App() {
         </div>
 
         <div className="actions">
-          <select
-            className="select"
-            value={selectedModel}
-            onChange={(e) => {
-              setSelectedModel(e.target.value);
-              setQ("");
-              setPage(1);
-            }}
-          >
-            {MODELS.map((m) => (
-              <option key={m.value} value={m.value}>
-                {m.label}
-              </option>
-            ))}
-          </select>
+        <select
+  className="select"
+  value={selectedModel}
+  onChange={(e)=>setSelectedModel(e.target.value)}
+>
+  {MODELS.map((m)=>(
+    <option key={m.value} value={m.value}>
+      {m.short}
+    </option>
+  ))}
+</select>
 
           <button className="btn" onClick={() => loadSelectedModel()} disabled={loading}>
             {loading ? "Refreshing..." : "Refresh Table"}
@@ -243,36 +259,61 @@ export default function App() {
       </header>
 
       <section className="grid">
-        <div className="card">
-          <div className="cardTitle">
-            <span>Search & Filter</span>
-            <span className="badge">
-              Rows: {filtered.length} / {rows.length}
-            </span>
-          </div>
+       <div className="card">
+  <div className="cardTitle">
+    <span>Search & Filter</span>
+    <span className="badge">
+      Rows: {filtered.length} / {rows.length}
+    </span>
+  </div>
 
-          <input
-            value={q}
-            onChange={(e) => {
-              setQ(e.target.value);
-              setPage(1);
-            }}
-            placeholder="Search by parking_id or timestamp..."
-            className="input"
-          />
+  <input
+    value={q}
+    onChange={(e) => {
+      setQ(e.target.value);
+      setPage(1);
+    }}
+    placeholder="Search by parking_id or timestamp..."
+    className="input"
+  />
 
-          <div className="kpis">
-            <span className="badge">
-              Model: {selectedModel.toUpperCase()}
-            </span>
-            <span className="badge">Page size: {pageSize}</span>
-            <span className="badge">Pages: {totalPages}</span>
-            <span className="badge">Showing: {from}-{to}</span>
-          </div>
+  <div className="kpis">
+    <span className="badge">Model: {selectedModel.toUpperCase()}</span>
+    <span className="badge">Page size: {pageSize}</span>
+    <span className="badge">Pages: {totalPages}</span>
+    <span className="badge">Showing: {from}-{to}</span>
+  </div>
 
-          {err && <div className="err">Error: {err}</div>}
-        </div>
+  {err && <div className="err">Error: {err}</div>}
 
+  <div className="miniChartWrap">
+    <div className="miniChartTitle">Dynamic Revenue Comparison</div>
+
+    <ResponsiveContainer width="100%" height={220}>
+      <BarChart data={revenueChartData}>
+        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
+        <XAxis dataKey="model" stroke="rgba(255,255,255,0.65)" />
+        <YAxis stroke="rgba(255,255,255,0.65)" />
+        <Tooltip
+          contentStyle={{
+            background: "#545458",
+            border: "1px solid rgba(255,255,255,0.12)",
+            borderRadius: "12px",
+            color: "#fff",
+          }}
+        />
+        <Bar dataKey="revenue" radius={[8, 8, 0, 0]}>
+          {revenueChartData.map((entry, index) => (
+            <Cell
+              key={`cell-${index}`}
+              fill={entry.isBest ? "#2fbf71" : "#8884d8"}
+            />
+          ))}
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
+  </div>
+</div>
         <div className="card">
           <div className="cardTitle">
             <span>Top 10 Highest Dynamic Prices</span>

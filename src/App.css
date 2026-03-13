@@ -251,12 +251,23 @@ body{
 }
 
 .select{
-  padding:8px 10px;
+  padding:8px 34px 8px 12px;
   border-radius:12px;
   border:1px solid var(--border2);
   background:#0f0f11;
   color:var(--text);
-  min-width:120px;
+
+  width:auto;
+  min-width:110px;
+
+  appearance:none;
+  -webkit-appearance:none;
+  -moz-appearance:none;
+
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 20 20'%3E%3Cpath d='M5 7l5 5 5-5H5z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 10px center;
+  background-size:14px;
 }
 
 .tableScroll{
@@ -353,4 +364,17 @@ tbody tr:hover{
   .actions .select{
     width:100%;
   }
+}
+
+.miniChartWrap{
+  margin-top:16px;
+  padding-top:14px;
+  border-top:1px solid rgba(255,255,255,0.08);
+}
+
+.miniChartTitle{
+  font-size:14px;
+  font-weight:600;
+  color:var(--text);
+  margin-bottom:10px;
 }
