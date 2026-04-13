@@ -30,6 +30,13 @@ import {
 import "./App.css";
 
 const MODELS = [
+    {
+    value: "transformer",
+    short: "TRANSFORMER",
+    long: "Transformer Forecast Model",
+    icon: Sparkles,
+    colorClass: "theme-transformer",
+  },
   {
     value: "hgbr",
     short: "HGBR",
@@ -72,13 +79,7 @@ const MODELS = [
     icon: Orbit,
     colorClass: "theme-lstmgru",
   },
-  {
-    value: "transformer",
-    short: "TRANSFORMER",
-    long: "Transformer Forecast Model",
-    icon: Sparkles,
-    colorClass: "theme-transformer",
-  },
+
 ];
 
 const fmt = (n) => {
@@ -101,7 +102,7 @@ const buildModelUrl = (baseUrl, model) => {
 export default function App() {
   const API_URL = import.meta.env.VITE_PRICING_API_URL;
 
-  const [selectedModel, setSelectedModel] = useState("prophet");
+  const [selectedModel, setSelectedModel] = useState("transformer");
   const [rows, setRows] = useState([]);
   const [meta, setMeta] = useState(null);
 
