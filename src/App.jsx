@@ -31,6 +31,13 @@ import "./App.css";
 
 const MODELS = [
     {
+    value: "rfr",
+    short: "RFR",
+    long: "Random Forest Regressor",
+    icon: Network,
+    colorClass: "theme-rfr",
+  },
+    {
     value: "transformer",
     short: "TRANSFORMER",
     long: "Transformer Forecast Model",
@@ -51,13 +58,7 @@ const MODELS = [
     icon: Activity,
     colorClass: "theme-xgbr",
   },
-  {
-    value: "rfr",
-    short: "RFR",
-    long: "Random Forest Regressor",
-    icon: Network,
-    colorClass: "theme-rfr",
-  },
+
   {
     value: "lstm",
     short: "LSTM",
@@ -354,7 +355,17 @@ export default function App() {
               <ChevronLeft size={16} />
               Prev Model
             </button>
-
+  <button
+              className="btn btnGhost"
+              onClick={() => moveModel(1)}
+              disabled={
+                MODELS.findIndex((m) => m.value === selectedModel) ===
+                MODELS.length - 1
+              }
+            >
+              Next Model
+              <ChevronRight size={16} />
+            </button>
             <button
               className="btn btnPrimary"
               onClick={() => loadSelectedModel()}
@@ -376,17 +387,7 @@ export default function App() {
               {comparisonLoading ? "Refreshing..." : "Refresh Comparison"}
             </button>
 
-            <button
-              className="btn btnGhost"
-              onClick={() => moveModel(1)}
-              disabled={
-                MODELS.findIndex((m) => m.value === selectedModel) ===
-                MODELS.length - 1
-              }
-            >
-              Next Model
-              <ChevronRight size={16} />
-            </button>
+          
           </div>
         </div>
       </header>
@@ -768,7 +769,7 @@ export default function App() {
       </section>
 
       <footer className="footer">
-        Azure Function API • Responsive dashboard for web and mobile
+        Azure Function API • Dynamic Pricing Dashbaord
       </footer>
     </div>
   );
