@@ -103,7 +103,7 @@ const buildModelUrl = (baseUrl, model) => {
 export default function App() {
   const API_URL = import.meta.env.VITE_PRICING_API_URL;
 
-  const [selectedModel, setSelectedModel] = useState("transformer");
+  const [selectedModel, setSelectedModel] = useState("rfr");
   const [rows, setRows] = useState([]);
   const [meta, setMeta] = useState(null);
 
