@@ -25,7 +25,11 @@ import {
   Layers3,
   Cpu,
   Network,
-  Orbit,
+  Orbit, X,
+  CalendarDays,
+  Clock3,
+  MapPin,
+  ArrowUpRight,
 } from "lucide-react";
 import "./App.css";
 
@@ -102,7 +106,7 @@ const buildModelUrl = (baseUrl, model) => {
 
 export default function App() {
   const API_URL = import.meta.env.VITE_PRICING_API_URL;
-
+const FUTURE_RFR_API_URL = import.meta.env.VITE_FUTURE_RFR_API_URL;
   const [selectedModel, setSelectedModel] = useState("rfr");
   const [rows, setRows] = useState([]);
   const [meta, setMeta] = useState(null);
@@ -117,11 +121,59 @@ export default function App() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
 
+  const [futureModalOpen, setFutureModalOpen] = useState(false);
+const [futureDate, setFutureDate] = useState("");
+const [futureHour, setFutureHour] = useState("00");
+const [futureParkingId, setFutureParkingId] = useState("");
+const [futureLoading, setFutureLoading] = useState(false);
+const [futureResult, setFutureResult] = useState(null);
+const [futureErr, setFutureErr] = useState("");
+
   const activeModel = useMemo(
     () => MODELS.find((m) => m.value === selectedModel),
     [selectedModel]
   );
+const parkingOptions = useMemo(() => {
+  return [...new Set(rows.map((r) => String(r.parking_id)))].sort();
+}, [rows]);
+const predictFutureRfrPrice = async () => {
+  setFutureErr("");
+  setFutureResult(null);
 
+  if (!FUTURE_RFR_API_URL) {
+    setFutureErr("Missing VITE_FUTURE_RFR_API_URL in .env file.");
+    return;
+  }
+
+  if (!futureDate || !futureParkingId || futureHour === "") {
+    setFutureErr("Please select future date, hour, and parking lot.");
+    return;
+  }
+
+  try {
+    setFutureLoading(true);
+
+    const params = new URLSearchParams({
+      parking_id: futureParkingId,
+      date: futureDate,
+      hour: futureHour,
+    });
+
+    const res = await fetch(`${FUTURE_RFR_API_URL}?${params.toString()}`);
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || `Prediction failed: ${res.status}`);
+    }
+
+    const json = await res.json();
+    setFutureResult(json.prediction);
+  } catch (e) {
+    setFutureErr(e.message || "Future prediction failed.");
+  } finally {
+    setFutureLoading(false);
+  }
+};
   const fetchModelData = async (model) => {
     const res = await fetch(buildModelUrl(API_URL, model), { method: "GET" });
     if (!res.ok) throw new Error(`API error (${model}): ${res.status}`);
@@ -306,6 +358,7 @@ export default function App() {
           </p> */}
 
           <div className="headerMeta">
+            
             <span className="badge strong">
               <Sparkles size={14} />
               {activeModel?.short}
@@ -347,6 +400,7 @@ export default function App() {
 
         <div className="headerRight">
           <div className="actionStack">
+       
             <button
               className="btn btnGhost"
               onClick={() => moveModel(-1)}
@@ -387,7 +441,14 @@ export default function App() {
               {comparisonLoading ? "Refreshing..." : "Refresh Comparison"}
             </button>
 
-          
+               <button
+  className="futureOpenBtn"
+  onClick={() => setFutureModalOpen(true)}
+>
+  <DollarSign size={16} />
+  Future Price Prediction
+  <ArrowUpRight size={15} />
+</button>
           </div>
         </div>
       </header>
@@ -767,7 +828,151 @@ export default function App() {
           </table>
         </div>
       </section>
+{futureModalOpen && (
+  <div className="modalOverlay">
+    <div className="futureModalCard">
+      <button
+        className="futureCloseBtn"
+        onClick={() => setFutureModalOpen(false)}
+      >
+        <X size={20} />
+      </button>
 
+      <div className="futureModalHero">
+        <div className="futureHeroIcon">
+          <DollarSign size={32} />
+        </div>
+
+        <div>
+          <h2>Future Parking Price Prediction</h2>
+          <p>
+            Select any future date, hour, and parking lot to predict the dynamic
+            parking price using the Random Forest Regressor model.
+          </p>
+        </div>
+      </div>
+
+      <div className="futureInputGrid">
+        <div className="futureInputBox">
+          <label>
+            <CalendarDays size={15} />
+            Future Date
+          </label>
+          <input
+            type="date"
+            className="input"
+            value={futureDate}
+            onChange={(e) => setFutureDate(e.target.value)}
+          />
+        </div>
+
+        <div className="futureInputBox">
+          <label>
+            <Clock3 size={15} />
+            Hour
+          </label>
+          <select
+            className="select futureSelect"
+            value={futureHour}
+            onChange={(e) => setFutureHour(e.target.value)}
+          >
+            {Array.from({ length: 24 }, (_, i) => (
+              <option key={i} value={String(i).padStart(2, "0")}>
+                {String(i).padStart(2, "0")}:00
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="futureInputBox">
+          <label>
+            <MapPin size={15} />
+            Parking Lot
+          </label>
+          <select
+            className="select futureSelect"
+            value={futureParkingId}
+            onChange={(e) => setFutureParkingId(e.target.value)}
+          >
+            <option value="">Select parking lot</option>
+            {parkingOptions.map((id) => (
+              <option key={id} value={id}>
+                {id}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <button
+        className="futurePredictBtn"
+        onClick={predictFutureRfrPrice}
+        disabled={futureLoading}
+      >
+        {futureLoading ? (
+          <>
+            <RefreshCw size={18} className="spin" />
+            Predicting Price...
+          </>
+        ) : (
+          <>
+            <DollarSign size={18} />
+            Predict Future Price
+          </>
+        )}
+      </button>
+
+      {futureErr && <div className="futureErrorBox">{futureErr}</div>}
+
+      {futureResult && (
+        <div className="futureResultPanel">
+          <div className="priceGlow">
+            <span>Predicted Dynamic Price</span>
+            <h1>${fmt(futureResult.dynamic_price)}</h1>
+          </div>
+
+          <div className="futureResultGrid">
+            <div className="futureResultItem">
+              <small>Parking Lot</small>
+              <strong>{futureResult.parking_id}</strong>
+            </div>
+
+            <div className="futureResultItem">
+              <small>Future Time</small>
+              <strong>{futureResult.ts_hour}</strong>
+            </div>
+
+            <div className="futureResultItem">
+              <small>Forecast Demand</small>
+              <strong>{fmt(futureResult.forecast_txn_count)}</strong>
+            </div>
+
+            <div className="futureResultItem">
+              <small>Static Revenue</small>
+              <strong>${fmt(futureResult.rev_static)}</strong>
+            </div>
+
+            <div className="futureResultItem">
+              <small>Dynamic Revenue</small>
+              <strong>${fmt(futureResult.rev_dynamic)}</strong>
+            </div>
+
+            <div className="futureResultItem highlight">
+              <small>Revenue Gain</small>
+              <strong>
+                $
+                {fmt(
+                  Number(futureResult.rev_dynamic) -
+                    Number(futureResult.rev_static)
+                )}
+              </strong>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+)}
       <footer className="footer">
         Azure Function API • Dynamic Pricing Dashbaord
       </footer>
