@@ -25,7 +25,8 @@ import {
   Layers3,
   Cpu,
   Network,
-  Orbit, X,
+  Orbit,
+  X,
   CalendarDays,
   Clock3,
   MapPin,
@@ -34,14 +35,14 @@ import {
 import "./App.css";
 
 const MODELS = [
-    {
+  {
     value: "rfr",
     short: "RFR",
     long: "Random Forest Regressor",
     icon: Network,
     colorClass: "theme-rfr",
   },
-    {
+  {
     value: "transformer",
     short: "TRANSFORMER",
     long: "Transformer Forecast Model",
@@ -84,7 +85,6 @@ const MODELS = [
     icon: Orbit,
     colorClass: "theme-lstmgru",
   },
-
 ];
 
 const fmt = (n) => {
@@ -106,7 +106,7 @@ const buildModelUrl = (baseUrl, model) => {
 
 export default function App() {
   const API_URL = import.meta.env.VITE_PRICING_API_URL;
-const FUTURE_RFR_API_URL = import.meta.env.VITE_FUTURE_RFR_API_URL;
+  const FUTURE_RFR_API_URL = import.meta.env.VITE_FUTURE_RFR_API_URL;
   const [selectedModel, setSelectedModel] = useState("rfr");
   const [rows, setRows] = useState([]);
   const [meta, setMeta] = useState(null);
@@ -122,58 +122,58 @@ const FUTURE_RFR_API_URL = import.meta.env.VITE_FUTURE_RFR_API_URL;
   const [pageSize, setPageSize] = useState(50);
 
   const [futureModalOpen, setFutureModalOpen] = useState(false);
-const [futureDate, setFutureDate] = useState("");
-const [futureHour, setFutureHour] = useState("00");
-const [futureParkingId, setFutureParkingId] = useState("");
-const [futureLoading, setFutureLoading] = useState(false);
-const [futureResult, setFutureResult] = useState(null);
-const [futureErr, setFutureErr] = useState("");
+  const [futureDate, setFutureDate] = useState("");
+  const [futureHour, setFutureHour] = useState("00");
+  const [futureParkingId, setFutureParkingId] = useState("");
+  const [futureLoading, setFutureLoading] = useState(false);
+  const [futureResult, setFutureResult] = useState(null);
+  const [futureErr, setFutureErr] = useState("");
 
   const activeModel = useMemo(
     () => MODELS.find((m) => m.value === selectedModel),
-    [selectedModel]
+    [selectedModel],
   );
-const parkingOptions = useMemo(() => {
-  return [...new Set(rows.map((r) => String(r.parking_id)))].sort();
-}, [rows]);
-const predictFutureRfrPrice = async () => {
-  setFutureErr("");
-  setFutureResult(null);
+  const parkingOptions = useMemo(() => {
+    return [...new Set(rows.map((r) => String(r.parking_id)))].sort();
+  }, [rows]);
+  const predictFutureRfrPrice = async () => {
+    setFutureErr("");
+    setFutureResult(null);
 
-  if (!FUTURE_RFR_API_URL) {
-    setFutureErr("Missing VITE_FUTURE_RFR_API_URL in .env file.");
-    return;
-  }
-
-  if (!futureDate || !futureParkingId || futureHour === "") {
-    setFutureErr("Please select future date, hour, and parking lot.");
-    return;
-  }
-
-  try {
-    setFutureLoading(true);
-
-    const params = new URLSearchParams({
-      parking_id: futureParkingId,
-      date: futureDate,
-      hour: futureHour,
-    });
-
-    const res = await fetch(`${FUTURE_RFR_API_URL}?${params.toString()}`);
-
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(text || `Prediction failed: ${res.status}`);
+    if (!FUTURE_RFR_API_URL) {
+      setFutureErr("Missing VITE_FUTURE_RFR_API_URL in .env file.");
+      return;
     }
 
-    const json = await res.json();
-    setFutureResult(json.prediction);
-  } catch (e) {
-    setFutureErr(e.message || "Future prediction failed.");
-  } finally {
-    setFutureLoading(false);
-  }
-};
+    if (!futureDate || !futureParkingId || futureHour === "") {
+      setFutureErr("Please select future date, hour, and parking lot.");
+      return;
+    }
+
+    try {
+      setFutureLoading(true);
+
+      const params = new URLSearchParams({
+        parking_id: futureParkingId,
+        date: futureDate,
+        hour: futureHour,
+      });
+
+      const res = await fetch(`${FUTURE_RFR_API_URL}?${params.toString()}`);
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `Prediction failed: ${res.status}`);
+      }
+
+      const json = await res.json();
+      setFutureResult(json.prediction);
+    } catch (e) {
+      setFutureErr(e.message || "Future prediction failed.");
+    } finally {
+      setFutureLoading(false);
+    }
+  };
   const fetchModelData = async (model) => {
     const res = await fetch(buildModelUrl(API_URL, model), { method: "GET" });
     if (!res.ok) throw new Error(`API error (${model}): ${res.status}`);
@@ -227,7 +227,7 @@ const predictFutureRfrPrice = async () => {
         MODELS.map(async (m) => {
           const result = await fetchModelData(m.value);
           return [m.value, result.meta];
-        })
+        }),
       );
 
       setComparison(Object.fromEntries(results));
@@ -260,7 +260,7 @@ const predictFutureRfrPrice = async () => {
   const top10 = useMemo(() => {
     const copy = [...filtered];
     copy.sort(
-      (a, b) => Number(b.dynamic_price ?? 0) - Number(a.dynamic_price ?? 0)
+      (a, b) => Number(b.dynamic_price ?? 0) - Number(a.dynamic_price ?? 0),
     );
     return copy.slice(0, 10);
   }, [filtered]);
@@ -302,14 +302,14 @@ const predictFutureRfrPrice = async () => {
 
   const bestModel = useMemo(() => {
     const valid = comparisonCards.filter(
-      (c) => c.meta && Number.isFinite(Number(c.meta.total_rev_dynamic))
+      (c) => c.meta && Number.isFinite(Number(c.meta.total_rev_dynamic)),
     );
     if (!valid.length) return null;
 
     return valid.reduce((best, curr) =>
       Number(curr.meta.total_rev_dynamic) > Number(best.meta.total_rev_dynamic)
         ? curr
-        : best
+        : best,
     );
   }, [comparisonCards]);
 
@@ -346,19 +346,18 @@ const predictFutureRfrPrice = async () => {
     <div className={`page ${activeModel?.colorClass || ""}`}>
       <header className="header glass">
         <div className="headerLeft">
-          <div className="eyebrow">
+          {/* <div className="eyebrow">
             <BarChart3 size={16} />
             <span>Dynamic Parking Pricing Dashboard</span>
-          </div>
+          </div> */}
 
-          <h1 className="title">Dynamic Shared Parking Prices</h1>
+          <h1 className="title">Shared Parking Dynamic Prices</h1>
 
           {/* <p className="sub bigSub">
             Compare revenue and price behavior across all forecasting models.
           </p> */}
 
           <div className="headerMeta">
-            
             <span className="badge strong">
               <Sparkles size={14} />
               {activeModel?.short}
@@ -375,9 +374,9 @@ const predictFutureRfrPrice = async () => {
             </span>
           </div>
 
-          <div className="sub">
+          {/* <div className="sub">
             Active model: <span className="mono">{activeModel?.long}</span>
-          </div>
+          </div> */}
 
           <div className="sub">
             {meta?.generated_at_utc ? (
@@ -400,16 +399,17 @@ const predictFutureRfrPrice = async () => {
 
         <div className="headerRight">
           <div className="actionStack">
-       
             <button
               className="btn btnGhost"
               onClick={() => moveModel(-1)}
-              disabled={MODELS.findIndex((m) => m.value === selectedModel) === 0}
+              disabled={
+                MODELS.findIndex((m) => m.value === selectedModel) === 0
+              }
             >
               <ChevronLeft size={16} />
               Prev Model
             </button>
-  <button
+            <button
               className="btn btnGhost"
               onClick={() => moveModel(1)}
               disabled={
@@ -420,35 +420,17 @@ const predictFutureRfrPrice = async () => {
               Next Model
               <ChevronRight size={16} />
             </button>
-            <button
-              className="btn btnPrimary"
-              onClick={() => loadSelectedModel()}
-              disabled={loading}
-            >
-              <RefreshCw size={16} className={loading ? "spin" : ""} />
-              {loading ? "Refreshing..." : "Refresh Table"}
-            </button>
+
+
 
             <button
-              className="btn"
-              onClick={loadComparison}
-              disabled={comparisonLoading}
+              className="futureOpenBtn"
+              onClick={() => setFutureModalOpen(true)}
             >
-              <TrendingUp
-                size={16}
-                className={comparisonLoading ? "spin" : ""}
-              />
-              {comparisonLoading ? "Refreshing..." : "Refresh Comparison"}
+              <DollarSign size={16} />
+              Future Price Prediction
+              <ArrowUpRight size={15} />
             </button>
-
-               <button
-  className="futureOpenBtn"
-  onClick={() => setFutureModalOpen(true)}
->
-  <DollarSign size={16} />
-  Future Price Prediction
-  <ArrowUpRight size={15} />
-</button>
           </div>
         </div>
       </header>
@@ -568,7 +550,10 @@ const predictFutureRfrPrice = async () => {
 
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={revenueChartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="rgba(255,255,255,0.08)"
+                />
                 <XAxis dataKey="model" stroke="rgba(255,255,255,0.65)" />
                 <YAxis stroke="rgba(255,255,255,0.65)" />
                 <Tooltip
@@ -636,12 +621,27 @@ const predictFutureRfrPrice = async () => {
               Model Comparison
             </span>
           </div>
-
+{/*     
           {bestModel && (
             <span className="badge badgeSuccess">
-              Best by dynamic revenue: {bestModel.short}
+              Best by revenue: {bestModel.short}
             </span>
-          )}
+          )} */}
+        
+
+            <button
+              className="btn"
+              onClick={loadComparison}
+              disabled={comparisonLoading}
+            >
+              <RefreshCw
+                size={16}
+                className={comparisonLoading ? "spin" : ""}
+              />
+              {comparisonLoading ? "Refreshing..." : "Refresh"}
+            </button>
+
+    
         </div>
 
         <div className="compareGrid">
@@ -678,7 +678,9 @@ const predictFutureRfrPrice = async () => {
                     <div className="metricGrid">
                       <div className="metricBox">
                         <div className="metricLabel">Rows</div>
-                        <div className="metricValue">{fmtInt(modelMeta.rows)}</div>
+                        <div className="metricValue">
+                          {fmtInt(modelMeta.rows)}
+                        </div>
                       </div>
 
                       <div className="metricBox">
@@ -738,7 +740,7 @@ const predictFutureRfrPrice = async () => {
               Price Table - {activeModel?.short}
             </span>
           </div>
-
+      
           <div className="tableControls">
             <div className="pagerInfo">
               Showing <span className="mono">{from}</span>-
@@ -793,6 +795,14 @@ const predictFutureRfrPrice = async () => {
               >
                 Last
               </button>
+                    <button
+              className="btn btnPrimary"
+              onClick={() => loadSelectedModel()}
+              disabled={loading}
+            >
+              <RefreshCw size={16} className={loading ? "spin" : ""} />
+              {loading ? "Refreshing..." : "Refresh"}
+            </button>
             </div>
           </div>
         </div>
@@ -828,151 +838,151 @@ const predictFutureRfrPrice = async () => {
           </table>
         </div>
       </section>
-{futureModalOpen && (
-  <div className="modalOverlay">
-    <div className="futureModalCard">
-      <button
-        className="futureCloseBtn"
-        onClick={() => setFutureModalOpen(false)}
-      >
-        <X size={20} />
-      </button>
+      {futureModalOpen && (
+        <div className="modalOverlay">
+          <div className="futureModalCard">
+            <button
+              className="futureCloseBtn"
+              onClick={() => setFutureModalOpen(false)}
+            >
+              <X size={20} />
+            </button>
 
-      <div className="futureModalHero">
-        <div className="futureHeroIcon">
-          <DollarSign size={32} />
-        </div>
+            <div className="futureModalHero">
+              <div className="futureHeroIcon">
+                <DollarSign size={32} />
+              </div>
 
-        <div>
-          <h2>Future Parking Price Prediction</h2>
-          <p>
-            Select any future date, hour, and parking lot to predict the dynamic
-            parking price using the Random Forest Regressor model.
-          </p>
-        </div>
-      </div>
-
-      <div className="futureInputGrid">
-        <div className="futureInputBox">
-          <label>
-            <CalendarDays size={15} />
-            Future Date
-          </label>
-          <input
-            type="date"
-            className="input"
-            value={futureDate}
-            onChange={(e) => setFutureDate(e.target.value)}
-          />
-        </div>
-
-        <div className="futureInputBox">
-          <label>
-            <Clock3 size={15} />
-            Hour
-          </label>
-          <select
-            className="select futureSelect"
-            value={futureHour}
-            onChange={(e) => setFutureHour(e.target.value)}
-          >
-            {Array.from({ length: 24 }, (_, i) => (
-              <option key={i} value={String(i).padStart(2, "0")}>
-                {String(i).padStart(2, "0")}:00
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="futureInputBox">
-          <label>
-            <MapPin size={15} />
-            Parking Lot
-          </label>
-          <select
-            className="select futureSelect"
-            value={futureParkingId}
-            onChange={(e) => setFutureParkingId(e.target.value)}
-          >
-            <option value="">Select parking lot</option>
-            {parkingOptions.map((id) => (
-              <option key={id} value={id}>
-                {id}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <button
-        className="futurePredictBtn"
-        onClick={predictFutureRfrPrice}
-        disabled={futureLoading}
-      >
-        {futureLoading ? (
-          <>
-            <RefreshCw size={18} className="spin" />
-            Predicting Price...
-          </>
-        ) : (
-          <>
-            <DollarSign size={18} />
-            Predict Future Price
-          </>
-        )}
-      </button>
-
-      {futureErr && <div className="futureErrorBox">{futureErr}</div>}
-
-      {futureResult && (
-        <div className="futureResultPanel">
-          <div className="priceGlow">
-            <span>Predicted Dynamic Price</span>
-            <h1>${fmt(futureResult.dynamic_price)}</h1>
-          </div>
-
-          <div className="futureResultGrid">
-            <div className="futureResultItem">
-              <small>Parking Lot</small>
-              <strong>{futureResult.parking_id}</strong>
+              <div>
+                <h2>Future Parking Price Prediction</h2>
+                <p>
+                  Select any future date, hour, and parking lot to predict the
+                  dynamic parking price using the Random Forest Regressor model.
+                </p>
+              </div>
             </div>
 
-            <div className="futureResultItem">
-              <small>Future Time</small>
-              <strong>{futureResult.ts_hour}</strong>
+            <div className="futureInputGrid">
+              <div className="futureInputBox">
+                <label>
+                  <CalendarDays size={15} />
+                  Future Date
+                </label>
+                <input
+                  type="date"
+                  className="input"
+                  value={futureDate}
+                  onChange={(e) => setFutureDate(e.target.value)}
+                />
+              </div>
+
+              <div className="futureInputBox">
+                <label>
+                  <Clock3 size={15} />
+                  Hour
+                </label>
+                <select
+                  className="select futureSelect"
+                  value={futureHour}
+                  onChange={(e) => setFutureHour(e.target.value)}
+                >
+                  {Array.from({ length: 24 }, (_, i) => (
+                    <option key={i} value={String(i).padStart(2, "0")}>
+                      {String(i).padStart(2, "0")}:00
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="futureInputBox">
+                <label>
+                  <MapPin size={15} />
+                  Parking Lot
+                </label>
+                <select
+                  className="select futureSelect"
+                  value={futureParkingId}
+                  onChange={(e) => setFutureParkingId(e.target.value)}
+                >
+                  <option value="">Select parking lot</option>
+                  {parkingOptions.map((id) => (
+                    <option key={id} value={id}>
+                      {id}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            <div className="futureResultItem">
-              <small>Forecast Demand</small>
-              <strong>{fmt(futureResult.forecast_txn_count)}</strong>
-            </div>
+            <button
+              className="futurePredictBtn"
+              onClick={predictFutureRfrPrice}
+              disabled={futureLoading}
+            >
+              {futureLoading ? (
+                <>
+                  <RefreshCw size={18} className="spin" />
+                  Predicting Price...
+                </>
+              ) : (
+                <>
+                  <DollarSign size={18} />
+                  Predict Future Price
+                </>
+              )}
+            </button>
 
-            <div className="futureResultItem">
-              <small>Static Revenue</small>
-              <strong>${fmt(futureResult.rev_static)}</strong>
-            </div>
+            {futureErr && <div className="futureErrorBox">{futureErr}</div>}
 
-            <div className="futureResultItem">
-              <small>Dynamic Revenue</small>
-              <strong>${fmt(futureResult.rev_dynamic)}</strong>
-            </div>
+            {futureResult && (
+              <div className="futureResultPanel">
+                <div className="priceGlow">
+                  <span>Predicted Dynamic Price</span>
+                  <h1>${fmt(futureResult.dynamic_price)}</h1>
+                </div>
 
-            <div className="futureResultItem highlight">
-              <small>Revenue Gain</small>
-              <strong>
-                $
-                {fmt(
-                  Number(futureResult.rev_dynamic) -
-                    Number(futureResult.rev_static)
-                )}
-              </strong>
-            </div>
+                <div className="futureResultGrid">
+                  <div className="futureResultItem">
+                    <small>Parking Lot</small>
+                    <strong>{futureResult.parking_id}</strong>
+                  </div>
+
+                  <div className="futureResultItem">
+                    <small>Future Time</small>
+                    <strong>{futureResult.ts_hour}</strong>
+                  </div>
+
+                  <div className="futureResultItem">
+                    <small>Forecast Demand</small>
+                    <strong>{fmt(futureResult.forecast_txn_count)}</strong>
+                  </div>
+
+                  <div className="futureResultItem">
+                    <small>Static Revenue</small>
+                    <strong>${fmt(futureResult.rev_static)}</strong>
+                  </div>
+
+                  <div className="futureResultItem">
+                    <small>Dynamic Revenue</small>
+                    <strong>${fmt(futureResult.rev_dynamic)}</strong>
+                  </div>
+
+                  <div className="futureResultItem highlight">
+                    <small>Revenue Gain</small>
+                    <strong>
+                      $
+                      {fmt(
+                        Number(futureResult.rev_dynamic) -
+                          Number(futureResult.rev_static),
+                      )}
+                    </strong>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
-    </div>
-  </div>
-)}
       <footer className="footer">
         Azure Function API • Dynamic Pricing Dashbaord
       </footer>
