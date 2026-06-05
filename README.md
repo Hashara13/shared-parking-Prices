@@ -16,6 +16,26 @@ Visit the deployed application:
 
 ---
 
+## Related Repositories
+
+This dashboard is the presentation layer of a complete cloud-native dynamic parking pricing solution.
+
+### Azure Function Pricing API
+
+Serverless backend responsible for generating dynamic parking prices from forecast demand data.
+
+**Repository:**  
+https://github.com/Hashara13/Dynamic-Pricing-Engine-Azure-Function-App
+
+### Research & Forecasting Pipeline
+
+Contains the forecasting models, demand prediction workflow, dynamic pricing experiments, and evaluation notebooks.
+
+**Repository:**  
+https://github.com/Hashara13/Dynamic-Parking-Pricing-Engine
+
+---
+
 ## System Architecture Overview
 
 Forecast Model (Local / Research Environment)  
