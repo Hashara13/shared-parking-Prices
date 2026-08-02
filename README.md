@@ -32,6 +32,14 @@ Contains the forecasting models, demand prediction workflow, dynamic pricing exp
 **Repository:**  
 https://github.com/Hashara13/Dynamic-Parking-Pricing-Engine
 
+### Cloud API Performance Testing
+
+Azure Cloud API Performance Testing with 300 API Requests
+
+**Repository:**  
+
+https://github.com/Hashara13/Dynamic-Pricing-Engine-Cloud-API-Test
+
 ---
 
 ## System Architecture Overview
